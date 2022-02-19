@@ -1,0 +1,25 @@
+{
+  "name": "ciberus-test-task",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/scripts/index.js",
+  "scripts": {
+    "dev": "concurrently -n parcel,playcanvas-watch \"parcel watch src/index.ts\" \"pcwatch --force\"",
+    "prettier:check": "cross-var prettier --check $npm_package_config_prettier_pattern",
+    "prettier:all": "cross-var prettier --write $npm_package_config_prettier_pattern",
+    "prettier:staged": "prettier --write",
+    "postinstall": "echo postinstall && cd node_modules/playcanvas-sync && npm i -g"
+  },
+  "config": {
+    "prettier_pattern": "**/*.{js,jsx,ts,tsx,json,css,scss,md}"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^7.0.0",
+    "cross-var": "^1.1.0",
+    "parcel": "^2.3.2",
+    "playcanvas-sync": "github:playcanvas/playcanvas-sync#acc64ec5b7ec8ba36f786424c217fc3c6912ae31",
+    "prettier": "^2.5.1"
+  }
+}
