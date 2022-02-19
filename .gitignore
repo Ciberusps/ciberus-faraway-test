@@ -2,7 +2,6 @@
 node_modules
 /.pnp
 .pnp.js
-.parcel-cache
 
 # testing
 /coverage
@@ -20,7 +19,6 @@ packages/admin/.env
 .env.test.local
 .env.production.local
 
-package-lock.json
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -32,3 +30,4 @@ yarn-error.log*
 dist/scripts/index.js
 dist/scripts/index.js.map
 .pcconfig
+.playcanvas-engine
