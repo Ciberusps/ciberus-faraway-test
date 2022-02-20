@@ -29,5 +29,5 @@ yarn-error.log*
 # playcanvas
 dist/scripts/index.js
 dist/scripts/index.js.map
-.pcconfig
 .playcanvas-engine
+pcconfig.json
