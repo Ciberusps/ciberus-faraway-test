@@ -1,4 +1,6 @@
-import { createScript, ScriptTypeBase, attrib } from "./utils/createScriptDecorator";
+import { createScript, attrib } from "./utils/createScriptDecorator";
+import { OnCollisionStart } from "./types/lifecycle";
+import { ScriptTypeBase } from "./types/ScriptTypeBase";
 
 @createScript("movement")
 class Movement extends ScriptTypeBase {
@@ -16,17 +18,19 @@ class Movement extends ScriptTypeBase {
     this.entity.rigidbody?.on("collisionstart", this.onCollisionStart, this);
   }
 
-  onCollisionStart(result: TRigidBody.TOnCollisionStartResult) {
+  onCollisionStart: OnCollisionStart = function (result) {
+    console.log("test", this);
     if (!result.other.tags.has("ground")) {
       return;
     }
 
     this.jumpAvailable = true;
-  }
+  };
 
-  update(dt: number) {
-    if (!this.cameraEntity || !this.entity.rigidbody)
-      throw new Error("cameraEntity && rigidbody should be defined");
+  update() {
+    if (!this.cameraEntity || !this.entity.rigidbody?.enabled) {
+      return;
+    }
 
     // WASD
     if (this.app.keyboard.isPressed(pc.KEY_A))

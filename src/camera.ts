@@ -1,11 +1,8 @@
-import {
-  createScript,
-  ScriptTypeBase,
-  attrib,
-  TJsonSchema,
-} from "./utils/createScriptDecorator";
+import { createScript, attrib } from "./utils/createScriptDecorator";
+import { TJsonAttributeSchemaProp } from "./types/attributes";
+import { ScriptTypeBase } from "./types/ScriptTypeBase";
 
-const pitchLimitScheme: TJsonSchema[] = [
+const pitchLimitScheme: TJsonAttributeSchemaProp[] = [
   {
     name: "min",
     type: "number",

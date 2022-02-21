@@ -1,4 +1,5 @@
-import { attrib, createScript, ScriptTypeBase } from "./utils/createScriptDecorator";
+import { createScript, attrib } from "./utils/createScriptDecorator";
+import { ScriptTypeBase } from "./types/ScriptTypeBase";
 
 @createScript("shooting")
 class Shooting extends ScriptTypeBase {
