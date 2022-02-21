@@ -4,7 +4,7 @@ import { ebEvents, events } from "./utils/events";
 
 import { OnCollisionStart } from "./types/lifecycle";
 import { ScriptTypeBase } from "./types/ScriptTypeBase";
-import { scriptEvents as falledCheckEvents } from "./falledCheck";
+import { falledCheckEvents } from "./falledCheck";
 
 @createScript("playerMovement")
 class PlayerMovement extends ScriptTypeBase {
@@ -21,7 +21,7 @@ class PlayerMovement extends ScriptTypeBase {
   initialize() {
     this.entity.rigidbody?.on(events.collisionstart, this.onCollisionStart, this);
 
-    this.on?.(falledCheckEvents.falled, this.onPlayerFalled, this);
+    this.entity.on?.(falledCheckEvents.falled, this.onFalled, this);
   }
 
   onCollisionStart: OnCollisionStart = function (result) {
@@ -33,7 +33,7 @@ class PlayerMovement extends ScriptTypeBase {
     this.jumpAvailable = true;
   };
 
-  onPlayerFalled() {
+  onFalled() {
     this.app.fire(ebEvents["player:falled"], this.entity);
   }
 

@@ -9,4 +9,5 @@ export const events = {
 // EventBus(this.app.on/fire) events
 export const ebEvents = {
   "player:falled": "player:falled",
+  "enemy:died": "enemy:died",
 };

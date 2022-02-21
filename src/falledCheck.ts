@@ -5,10 +5,13 @@ import { getCollisionHeight } from "./utils";
 import { createScript, attrib } from "./utils/createScriptDecorator";
 import { events } from "./utils/events";
 import { IS_DEV } from "./utils/config";
+import { entityTags } from "./utils/tags";
 
 // for script debugging change on true TODO: debug subsystem
 const IS_DEBUG = IS_DEV && false;
-export const scriptEvents = { falled: "falled" };
+
+export const falledCheckEvents = { falled: "falled" };
+const groundOffset = 0.05;
 
 @createScript("falledCheck")
 class FalledCheck extends ScriptTypeBase {
@@ -42,28 +45,35 @@ class FalledCheck extends ScriptTypeBase {
 
     const halfHeight = getCollisionHeight(this.entity.collision) / 2;
     const position = this.entity.getPosition();
-    const from = new pc.Vec3(position.x, position.y - halfHeight, position.z);
+    const from = new pc.Vec3(
+      position.x,
+      position.y - halfHeight + groundOffset,
+      position.z
+    );
     const to = new pc.Vec3(from.x, from.y - this.maxFallDistance, from.z);
 
     IS_DEBUG &&
       console.log("Raycast to find the 'ground'", { halfHeight, position, from, to });
 
     // @ts-ignore
-    const result = this.app.systems.rigidbody.raycastFirst(from, to);
-    // TODO: draw debug line
+    const result: pc.RaycastResult | undefined = this.app.systems.rigidbody.raycastFirst(
+      from,
+      to
+    );
 
-    if (!result) {
+    if (!result || !result?.entity?.tags?.has(entityTags.ground)) {
       IS_DEBUG && console.info("Raycast has no result - falled");
-      this.entity.fire(scriptEvents.falled);
+      this.entity.fire(falledCheckEvents.falled);
     }
   }
 
-  onCollisionStart: OnCollisionStart = function () {
+  onCollisionStart: OnCollisionStart = function (result) {
+    if (!result.other.tags.has(entityTags.ground)) return;
     clearTimeout(this.fallTimer);
   };
 
-  onCollisionEnd: OnCollisionEnd = function () {
-    // no need for ground filter
+  onCollisionEnd: OnCollisionEnd = function (result) {
+    if (!result.tags.has(entityTags.ground)) return;
     this.fallTimer = setTimeout(this.checkIsFalled.bind(this), this.checkDelay * 1000);
   };
 }
