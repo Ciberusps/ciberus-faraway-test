@@ -1,10 +1,13 @@
 import { createScript, attrib } from "./utils/createScriptDecorator";
+import { entityTags } from "./utils/tags";
+import { ebEvents, events } from "./utils/events";
+
 import { OnCollisionStart } from "./types/lifecycle";
 import { ScriptTypeBase } from "./types/ScriptTypeBase";
-import { entityTags } from "./utils/tags";
+import { scriptEvents as falledCheckEvents } from "./falledCheck";
 
-@createScript("movement")
-class Movement extends ScriptTypeBase {
+@createScript("playerMovement")
+class PlayerMovement extends ScriptTypeBase {
   direction = new pc.Vec3(0, 0, 0);
   jumpAvailable = true;
 
@@ -16,7 +19,9 @@ class Movement extends ScriptTypeBase {
   jumpPower: number;
 
   initialize() {
-    this.entity.rigidbody?.on("collisionstart", this.onCollisionStart, this);
+    this.entity.rigidbody?.on(events.collisionstart, this.onCollisionStart, this);
+
+    this.on?.(falledCheckEvents.falled, this.onPlayerFalled, this);
   }
 
   onCollisionStart: OnCollisionStart = function (result) {
@@ -27,6 +32,10 @@ class Movement extends ScriptTypeBase {
 
     this.jumpAvailable = true;
   };
+
+  onPlayerFalled() {
+    this.app.fire(ebEvents["player:falled"], this.entity);
+  }
 
   update() {
     if (!this.cameraEntity || !this.entity.rigidbody?.enabled) {

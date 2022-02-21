@@ -16,12 +16,12 @@ export function createScript(name: string) {
     const instance = new obj();
     const script: any = pc.createScript(name);
 
+    instance.attributesData = instance.attributesData || {};
     // Add public attributes accessible in the editor
-    if (instance.attributesData) {
-      for (let attr in instance.attributesData) {
-        script.attributes.add(attr, instance.attributesData[attr]);
-      }
+    for (let attr in instance.attributesData) {
+      script.attributes.add(attr, instance.attributesData[attr]);
     }
+
     // Add instance properties and methods to prototype
     let proto = script.prototype;
     for (let prop in instance) {
