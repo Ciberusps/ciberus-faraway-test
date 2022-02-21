@@ -1,1 +1,1 @@
-export type TTags = "ground" | "damageable";
+export {};

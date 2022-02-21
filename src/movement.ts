@@ -1,6 +1,7 @@
 import { createScript, attrib } from "./utils/createScriptDecorator";
 import { OnCollisionStart } from "./types/lifecycle";
 import { ScriptTypeBase } from "./types/ScriptTypeBase";
+import { entityTags } from "./utils/tags";
 
 @createScript("movement")
 class Movement extends ScriptTypeBase {
@@ -19,8 +20,8 @@ class Movement extends ScriptTypeBase {
   }
 
   onCollisionStart: OnCollisionStart = function (result) {
-    console.log("test", this);
-    if (!result.other.tags.has("ground")) {
+    const { tags } = result.other;
+    if (!tags.has(entityTags.ground, entityTags.damageable)) {
       return;
     }
 
