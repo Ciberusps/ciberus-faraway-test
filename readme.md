@@ -24,4 +24,20 @@
 - mb scripts load order broken
 - typescript classes cant inherit methods types from parent and also methods cant be arrow functions because they lost "this" may be somehow methods can be binded in createScriptDecorator but i didnt found how
 - "debug subsystem" like ue4, map with flags that turn on/off debugCategories, should be invoked from dev tools console like `debugSubsystem("%system_name%", true)`
+- probably refactor project code structure in ue4-like style
+
+  ```src
+    ├── characters
+    │   ├── enemy
+    │   ├── player
+    ├── components
+    │   ├── movementComponents
+    │   │   ├── playerMovement
+    │   │   ├── lookAtMainCamera
+    │   ├── weapon
+    │   │   ├── shooting(better split on weapon barrel)
+    ├── ui
+    │   ├── enemyHpBarView
+  ```
+
 - mb types should be from latest github release of playcanvas engine installed like this(dont works) `npm i https://github.com/playcanvas/engine/releases/latest -D`) for now its installed via `npm i https://github.com/playcanvas/engine/tree/v1.51.7 -D` strict to some version probably better than use `dev` branch... npm i dont work with playcanvas repo(
