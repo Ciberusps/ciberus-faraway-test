@@ -1,5 +1,13 @@
 # ciberus-faraway-test
 
+Test task commits - https://github.com/Ciberusps/ciberus-faraway-test/compare/34475dd22317a6af85e7c2eb54769c6b960bd336...9662e39cf557f6406e39fdf5e4beb53e0075b0cd
+
+Project - https://playcanvas.com/project/883292/overview/ciberus_test_task
+branch - `feature/test-task`
+DefaultGym(scene) for testing purposes
+
+Build - https://playcanv.as/p/DysznB0H
+
 ## Setup
 
 - Install dependencies `npm i`
