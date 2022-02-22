@@ -34,7 +34,7 @@ class Spawner extends ScriptTypeBase {
     const player = this.entity.findByTag(entityTags.player)[0];
     this.spawnPositions = [
       player.getPosition().clone(),
-      ...enemies.map((e) => e.getPosition()),
+      ...enemies.map((e) => e.getPosition().clone()),
     ];
 
     this.app.on(ebEvents["player:falled"], this.spawnAtRandomPoint, this);
