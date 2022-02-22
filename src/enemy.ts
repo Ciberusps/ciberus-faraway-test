@@ -1,31 +1,49 @@
+import EnemyHpBarView from "./ui/enemyHpBarView";
+import { falledCheckEvents } from "./falledCheck";
+
 import { createScript, attrib } from "./utils/createScriptDecorator";
 import { ebEvents } from "./utils/events";
 
 import { ScriptTypeBase } from "./types/ScriptTypeBase";
-import { falledCheckEvents } from "./falledCheck";
 
 @createScript("enemy")
 class Enemy extends ScriptTypeBase {
   @attrib({ type: "number", default: 3 })
-  health: number;
+  hp: number;
+
+  @attrib({ type: "entity" })
+  hpBarView: pc.Entity;
+
+  maxHp: number;
+  hpBarViewScript: EnemyHpBarView;
 
   initialize() {
-    this.entity.on("damage", this.tryTakeDamage, this);
+    this.maxHp = this.hp;
 
+    this.hpBarViewScript = (this.hpBarView.script as any)
+      ?.enemyHpBarView as EnemyHpBarView;
+    if (!this.hpBarViewScript) {
+      console.warn("[Enemy] hpBarViewScript required");
+    } else {
+      this.hpBarViewScript.updateValues(this.hp, this.maxHp);
+    }
+
+    this.entity.on("damage", this.tryTakeDamage, this);
     this.entity.on?.(falledCheckEvents.falled, this.onFalled, this);
   }
 
   tryTakeDamage(damage: number) {
-    this.health -= damage;
+    this.hp -= damage;
 
-    if (this.health <= 0) {
+    this.hpBarViewScript.updateValues(this.hp, this.maxHp);
+    if (this.hp <= 0) {
       this.die();
     }
   }
 
   onFalled() {
     console.log("Enemy falled");
-    this.tryTakeDamage(this.health);
+    this.tryTakeDamage(this.hp);
   }
 
   die() {
@@ -33,3 +51,5 @@ class Enemy extends ScriptTypeBase {
     this.entity.destroy();
   }
 }
+
+export default Enemy;

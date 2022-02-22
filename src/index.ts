@@ -4,6 +4,9 @@ import "./shooting";
 import "./enemy";
 import "./falledCheck";
 import "./spawner";
+import "./lookAtMainCamera";
+
+import "./ui/enemyHpBarView";
 
 console.log(
   `--------------------------------------------------------------------------------
