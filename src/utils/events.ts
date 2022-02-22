@@ -9,5 +9,8 @@ export const events = {
 // EventBus(this.app.on/fire) events
 export const ebEvents = {
   "player:falled": "player:falled",
+  "player:score:changed": "player:score:changed",
   "enemy:died": "enemy:died",
 };
+
+export type TOnPlayerScoreChanged = (newScore: number) => void;

@@ -1,3 +1,4 @@
+import "./characters/player";
 import "./playerMovement";
 import "./camera";
 import "./shooting";
@@ -7,6 +8,7 @@ import "./spawner";
 import "./lookAtMainCamera";
 
 import "./ui/enemyHpBarView";
+import "./ui/playerScoreView";
 
 console.log(
   `--------------------------------------------------------------------------------
