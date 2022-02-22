@@ -9,6 +9,8 @@ import "./lookAtMainCamera";
 
 import "./ui/enemyHpBarView";
 import "./ui/playerScoreView";
+import "./ui/playerAmmoView";
+import "./ui/reloadingView";
 
 console.log(
   `--------------------------------------------------------------------------------

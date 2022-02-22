@@ -1,6 +1,9 @@
 import { createScript, attrib } from "./utils/createScriptDecorator";
+import { ebEvents, events } from "./utils/events";
+
 import { ScriptTypeBase } from "./types/ScriptTypeBase";
-import { events } from "./utils/events";
+
+const defaultAmmoCount = 30;
 
 @createScript("shooting")
 class Shooting extends ScriptTypeBase {
@@ -8,6 +11,8 @@ class Shooting extends ScriptTypeBase {
   cameraEntity?: pc.Entity;
   @attrib({ type: "entity" })
   particlesEntity?: pc.Entity;
+  @attrib({ type: "entity" })
+  gunEntity?: pc.Entity;
   @attrib({
     type: "number",
     default: 50,
@@ -15,22 +20,53 @@ class Shooting extends ScriptTypeBase {
     description: "Time between 'shots' in ms",
   })
   fireRateMs: number = 50;
+  @attrib({ type: "number", default: defaultAmmoCount, min: 1 })
+  ammo: number;
+  @attrib({ type: "number", default: defaultAmmoCount, min: 1 })
+  maxAmmo: number;
+  @attrib({ type: "boolean", default: true })
+  autoReload: boolean;
+  @attrib({
+    type: "number",
+    default: 1,
+    min: 0.01,
+    description: "Reload time in seconds",
+  })
+  reloadTime: number;
 
   shotTimer: TInterval;
+  reloadingTimer: TTimeout;
+  isReloading: boolean = false;
 
   initialize() {
     if (!this.cameraEntity || !this.particlesEntity) {
       console.warn("[Shooting] cameraEntity && particlesEntity required");
     }
 
-    this.app.mouse.on(pc.EVENT_MOUSEDOWN, this.startFire, this);
-    this.app.mouse.on(pc.EVENT_MOUSEUP, this.stopFire, this);
+    this.setAmmo(this.ammo);
+    this.app.fire(ebEvents["weapon:reloading:changed"], false);
+
+    // player controller and "pawn" should be splitted
+    // controller should handle events and send to "pawn"(player or ai enemy)
+    this.app.mouse.on(pc.EVENT_MOUSEDOWN, this.onMouseDown, this);
+    this.app.mouse.on(pc.EVENT_MOUSEUP, this.onMouseUp, this);
+    this.app.keyboard.on(pc.EVENT_KEYDOWN, this.onKeyDown, this);
     this.on?.(events.destroy, this.onDestroy, this);
   }
 
   onDestroy() {
-    this.app.mouse.off(pc.EVENT_MOUSEDOWN, this.startFire);
-    this.app.mouse.off(pc.EVENT_MOUSEUP, this.stopFire);
+    this.app.mouse.off(pc.EVENT_MOUSEDOWN, this.onMouseDown);
+    this.app.mouse.off(pc.EVENT_MOUSEUP, this.onMouseUp);
+    this.app.keyboard.off(pc.EVENT_KEYDOWN, this.onKeyDown);
+  }
+
+  setAmmo(newAmmo: number) {
+    this.ammo = newAmmo;
+    this.app.fire(ebEvents["weapon:ammo:changed"], this.ammo, Number.POSITIVE_INFINITY);
+  }
+
+  canShoot(): boolean {
+    return this.ammo > 0 && !this.isReloading;
   }
 
   makeShot() {
@@ -39,6 +75,16 @@ class Shooting extends ScriptTypeBase {
       console.warn("[Shooting] cameraComponent required");
       return;
     }
+
+    if (!this.canShoot()) {
+      this.stopFire();
+      if (this.ammo === 0 && this.autoReload) {
+        this.startReload();
+      }
+      return;
+    }
+
+    this.setAmmo(this.ammo - 1);
 
     if (this.particlesEntity) {
       this.particlesEntity.particlesystem?.reset();
@@ -59,14 +105,42 @@ class Shooting extends ScriptTypeBase {
     result.entity.fire("damage", 1);
   }
 
-  startFire(event: pc.MouseEvent) {
-    if (event.button !== pc.MOUSEBUTTON_LEFT) return;
+  startFire() {
     clearInterval(this.shotTimer);
     this.shotTimer = setInterval(this.makeShot.bind(this), this.fireRateMs);
   }
 
-  stopFire(event: pc.MouseEvent) {
-    if (event.button !== pc.MOUSEBUTTON_LEFT) return;
+  stopFire() {
     clearInterval(this.shotTimer);
   }
+
+  startReload() {
+    if (this.ammo === this.maxAmmo || this.isReloading) return;
+    this.isReloading = true;
+    this.reloadingTimer = setTimeout(this.endReload.bind(this), this.reloadTime * 1000);
+    this.gunEntity?.rotateLocal(45, 0, 0);
+    this.app.fire(ebEvents["weapon:reloading:changed"], true);
+  }
+
+  endReload() {
+    this.isReloading = false;
+    this.setAmmo(this.maxAmmo);
+    clearTimeout(this.reloadingTimer);
+    this.gunEntity?.rotateLocal(-45, 0, 0);
+    this.app.fire(ebEvents["weapon:reloading:changed"], false);
+  }
+
+  onMouseDown(event: pc.MouseEvent) {
+    if (event.button === pc.MOUSEBUTTON_LEFT) this.startFire();
+  }
+
+  onMouseUp(event: pc.MouseEvent) {
+    if (event.button === pc.MOUSEBUTTON_LEFT) this.stopFire();
+  }
+
+  onKeyDown(event: pc.KeyboardEvent) {
+    if (event.key === pc.KEY_R) this.startReload();
+  }
 }
+
+export default Shooting;
