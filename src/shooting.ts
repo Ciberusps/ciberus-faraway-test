@@ -1,25 +1,49 @@
 import { createScript, attrib } from "./utils/createScriptDecorator";
 import { ScriptTypeBase } from "./types/ScriptTypeBase";
+import { events } from "./utils/events";
 
 @createScript("shooting")
 class Shooting extends ScriptTypeBase {
-  health: number;
-
   @attrib({ type: "entity" })
   cameraEntity?: pc.Entity;
   @attrib({ type: "entity" })
   particlesEntity?: pc.Entity;
+  @attrib({
+    type: "number",
+    default: 50,
+    min: 1,
+    description: "Time between 'shots' in ms",
+  })
+  fireRateMs: number = 50;
 
-  update() {
-    if (!this.app.mouse.wasPressed(pc.MOUSEBUTTON_LEFT)) return;
-    if (!this.particlesEntity || !this.cameraEntity) return;
+  shotTimer: TInterval;
 
-    const cameraComponent = this.cameraEntity.camera;
+  initialize() {
+    if (!this.cameraEntity || !this.particlesEntity) {
+      console.warn("[Shooting] cameraEntity && particlesEntity required");
+    }
 
-    if (!cameraComponent) return;
+    this.app.mouse.on(pc.EVENT_MOUSEDOWN, this.startFire, this);
+    this.app.mouse.on(pc.EVENT_MOUSEUP, this.stopFire, this);
+    this.on?.(events.destroy, this.onDestroy, this);
+  }
 
-    this.particlesEntity.particlesystem?.reset();
-    this.particlesEntity.particlesystem?.play();
+  onDestroy() {
+    this.app.mouse.off(pc.EVENT_MOUSEDOWN, this.startFire);
+    this.app.mouse.off(pc.EVENT_MOUSEUP, this.stopFire);
+  }
+
+  makeShot() {
+    const cameraComponent = this.cameraEntity?.camera;
+    if (!cameraComponent) {
+      console.warn("[Shooting] cameraComponent required");
+      return;
+    }
+
+    if (this.particlesEntity) {
+      this.particlesEntity.particlesystem?.reset();
+      this.particlesEntity.particlesystem?.play();
+    }
 
     // screen center
     const x = this.app.graphicsDevice.width / 2;
@@ -29,12 +53,20 @@ class Shooting extends ScriptTypeBase {
     const to = cameraComponent.screenToWorld(x, y, cameraComponent.farClip);
 
     // @ts-ignore
-    const result = this.app.systems.rigidbody.raycastFirst(from, to);
+    const result: pc.RaycastResult = this.app.systems.rigidbody.raycastFirst(from, to);
 
-    if (!result || !result.entity) return;
+    if (!result || !result.entity.tags.has("damageable")) return;
+    result.entity.fire("damage", 1);
+  }
 
-    if (result.entity.tags.has("damageable")) {
-      result.entity.fire("damage", 1);
-    }
+  startFire(event: pc.MouseEvent) {
+    if (event.button !== pc.MOUSEBUTTON_LEFT) return;
+    clearInterval(this.shotTimer);
+    this.shotTimer = setInterval(this.makeShot.bind(this), this.fireRateMs);
+  }
+
+  stopFire(event: pc.MouseEvent) {
+    if (event.button !== pc.MOUSEBUTTON_LEFT) return;
+    clearInterval(this.shotTimer);
   }
 }
